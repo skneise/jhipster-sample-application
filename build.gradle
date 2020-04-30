@@ -57,10 +57,10 @@ if (project.hasProperty("gae")) {
 
     dependencyManagement {
         imports {
-            mavenBom 'io.github.jhipster:jhipster-dependencies:${jhipster_dependencies_version}'
+            mavenBom "io.github.jhipster:jhipster-dependencies:${jhipster_dependencies_version}"
         }
     }
-    appengineStage.dependsOn thinResolve 
+    appengineStage.dependsOn thinResolve
 }
 
 if (project.hasProperty("zipkin")) {
@@ -180,6 +180,13 @@ nohttp {
 configurations {
     providedRuntime
     implementation.exclude module: "spring-boot-starter-tomcat"
+    all {
+        resolutionStrategy {
+            // Inherited version from Spring Boot can't be used because of regressions:
+            // To be removed as soon as spring-boot use the same version
+            force 'org.liquibase:liquibase-core:3.8.7'
+        }
+    }
 }
 
 repositories {
@@ -198,12 +205,14 @@ dependencies {
     // Use ", version: jhipster_dependencies_version, changing: true" if you want
     // to use a SNAPSHOT release instead of a stable release
     implementation group: "io.github.jhipster", name: "jhipster-framework"
+    implementation "javax.annotation:javax.annotation-api"
     implementation "org.springframework.boot:spring-boot-starter-cache"
     implementation "io.dropwizard.metrics:metrics-core"
     implementation "io.micrometer:micrometer-registry-prometheus"
     implementation "net.logstash.logback:logstash-logback-encoder"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-hppc"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "com.fasterxml.jackson.module:jackson-module-jaxb-annotations"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-hibernate5"
     implementation "com.fasterxml.jackson.core:jackson-annotations"
     implementation "com.fasterxml.jackson.core:jackson-databind"
@@ -247,7 +256,6 @@ dependencies {
     implementation "org.springframework.security:spring-security-web"
     implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
     implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
-    implementation "org.springframework.security.oauth:spring-security-oauth2"
     implementation ("io.springfox:springfox-swagger2") {
         exclude module: "mapstruct"
     }
@@ -258,23 +266,14 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstruct_version}"
     annotationProcessor "org.hibernate:hibernate-jpamodelgen:${hibernate_version}"
     annotationProcessor "org.glassfish.jaxb:jaxb-runtime:${jaxb_runtime_version}"
-    annotationProcessor ("org.springframework.boot:spring-boot-configuration-processor:${spring_boot_version}") {
-        exclude group: "com.vaadin.external.google", module: "android-json"
-    }
-    testImplementation "com.jayway.jsonpath:json-path"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${spring_boot_version}"
     testImplementation ("org.springframework.boot:spring-boot-starter-test") {
-        exclude module: "junit"
-        exclude group: "com.vaadin.external.google", module: "android-json"
+        exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.springframework.boot:spring-boot-test"
-    testImplementation "org.junit.jupiter:junit-jupiter-engine"
     testImplementation "com.tngtech.archunit:archunit-junit5-api:${archunit_junit5_version}"
     testRuntimeOnly "com.tngtech.archunit:archunit-junit5-engine:${archunit_junit5_version}"
-    testImplementation "org.assertj:assertj-core"
-    testImplementation "junit:junit"
-    testImplementation "org.mockito:mockito-core"
-    testImplementation "org.hamcrest:hamcrest-library"
     testImplementation "com.h2database:h2"
     liquibaseRuntime "com.h2database:h2"
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
@@ -297,7 +296,7 @@ task cleanResources(type: Delete) {
 }
 
 wrapper {
-    gradleVersion = "6.0.1"
+    gradleVersion = "6.1"
 }
 
 compileJava.dependsOn processResources
